@@ -4,7 +4,12 @@ import sys, os
 from flask import send_from_directory
 
 
-sys.path.append("..")
+import sys
+import os
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(BASE_DIR)
+
 from project1_2.friday_brain import friday_engine
 
 
