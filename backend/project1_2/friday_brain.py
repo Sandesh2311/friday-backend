@@ -14,10 +14,13 @@ from dotenv import load_dotenv
 load_dotenv()
 
 
+import os
+
 ai_client = OpenAI(
     base_url="https://api.sambanova.ai/v1",
-    api_key="98386aea-570b-4c45-90ec-7c2fe7f35887"
+    api_key=os.getenv("OPENAI_API_KEY")
 )
+
 
 def hindi_to_english(text):
     try:
@@ -26,116 +29,7 @@ def hindi_to_english(text):
         return text
 
 
-# def friday_engine(command: str):
-#     c = command.lower()
 
-#     # 🌐 OPEN WEBSITES
-#     if "google" in c:
-#         return {"type": "action", "data": "https://google.com"}
-
-#     if "youtube" in c:
-#         return {"type": "action", "data": "https://youtube.com"}
-
-#     # 🎵 MUSIC
-#     # 🎵 MUSIC
-#     if c.startswith("play") or "gaana" in c:
-#         words = c.split()
-
-#         # 1️⃣ local library
-#         for w in words:
-#             w = hindi_to_english(w).lower()
-#             if w in music:
-#                 return {
-#                     "type": "action",
-#                     "data": music[w]
-#                 }
-
-#         # 2️⃣ YouTube fallback (NO TEXT, ONLY ACTION)
-#         query = (
-#             c.replace("play", "")
-#             .replace("gaana", "")
-#             .replace("song", "")
-#             .strip()
-#         )
-
-#         search_url = f"https://www.youtube.com/results?search_query={query}"
-
-#         return {
-#             "type": "action",
-#             "data": search_url
-#         }
-
-
-
-#     # 🖼 IMAGE GENERATOR
-#     if "image" in c and any(k in c for k in ["generate", "create", "make", "draw", "bana"]):
-#         prompt = c
-#         for w in ["generate", "create", "make", "draw", "image", "picture", "bana"]:
-#             prompt = prompt.replace(w, "")
-#         prompt = prompt.strip()
-
-#         if not prompt:
-#             return {"type": "text", "data": "Please describe the image"}
-
-#         image_path = generate_image(prompt)
-#         image_name = os.path.basename(image_path)
-
-#         return {
-#             "type": "image",
-#             "data": f"http://127.0.0.1:5000/images/{image_name}"
-#         }
-
-#     # 📰 NEWS
-#     if "news" in c or "khabar" in c:
-#         try:
-#             r = requests.get(
-#                 "https://newsapi.org/v2/top-headlines",
-#                 params={
-#                     "country": "in",
-#                     "apiKey": "NEWS_API_KEY"
-#                 },
-#                 timeout=10
-#             )
-
-#             data = r.json()
-
-#             if data.get("articles"):
-#                 headlines = [a["title"] for a in data["articles"][:5]]
-#                 return {
-#                     "type": "text",
-#                     "data": " | ".join(headlines)
-#                 }
-#             else:
-#                 return {"type": "text", "data": "No news found right now"}
-
-#         except Exception as e:
-#             return {"type": "text", "data": "News service unavailable"}
-
-
-#     # 🤖 AI CHAT (FINAL FALLBACK)
-#     # 🤖 AI CHAT (FINAL FALLBACK)
-
-#     # 🤖 AI CHAT (FINAL FALLBACK)
-#     try:
-#         completion = ai_client.chat.completions.create(
-#             model="Meta-Llama-3.3-70B-Instruct",
-#             messages=[
-#                 {"role": "system", "content": "You are Friday, an intelligent assistant."},
-#                 {"role": "user", "content": command}
-#             ]
-#         )
-
-#         return {
-#             "type": "text",
-#             "data": completion.choices[0].message.content
-#         }
-    
-
-#     except Exception as e:
-#         return {
-#             "type": "text",
-#             "data": "AI service is temporarily unavailable"
-#         }
 
 def friday_engine(command: str):
     c = command.lower()
@@ -226,7 +120,7 @@ def friday_engine(command: str):
                     "q": "india",
                     "language": "en",
                     "sortBy": "publishedAt",
-                    "apiKey": "2646fc30f2fd4ef49a82ace817da207a"
+                    "apiKey": os.getenv("NEWS_API_KEY")
                 },
                 timeout=10
             )
