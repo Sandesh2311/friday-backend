@@ -1,0 +1,202 @@
+* {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+body {
+    background:
+        radial-gradient(circle at 20% 20%, rgba(30, 58, 138, 0.33), transparent 40%),
+        radial-gradient(circle at 80% 30%, rgba(147, 51, 234, 0.33), transparent 40%),
+        radial-gradient(circle at 50% 80%, rgba(14, 165, 233, 0.33), transparent 40%),
+        linear-gradient(180deg, #020617, #000);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #e5e7eb;
+    padding: 16px;
+}
+
+.chat-container {
+    width: 420px;
+    height: 620px;
+    background: rgba(2, 6, 23, 0.9);
+    backdrop-filter: blur(12px);
+    border-radius: 18px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-shadow:
+        0 0 0 1px rgba(148, 163, 184, 0.08),
+        0 20px 40px rgba(0, 0, 0, 0.8),
+        0 0 40px rgba(56, 189, 248, 0.15);
+    animation: fadeIn 0.5s ease;
+}
+
+.chat-header {
+    padding: 18px;
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: 6px;
+    color: #e0f2fe;
+    background:
+        linear-gradient(135deg, #020617, rgba(2, 6, 23, 0.8)),
+        linear-gradient(135deg, #38bdf8, #9333ea);
+    background-blend-mode: overlay;
+    border-bottom: 1px solid #1e293b;
+    text-shadow: 0 0 8px #38bdf8, 0 0 16px #9333ea;
+}
+
+#chat-box {
+    flex: 1;
+    padding: 14px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: #334155 transparent;
+}
+
+#chat-box::-webkit-scrollbar {
+    width: 6px;
+}
+
+#chat-box::-webkit-scrollbar-thumb {
+    background: #334155;
+    border-radius: 10px;
+}
+
+.message {
+    max-width: 78%;
+    padding: 12px 15px;
+    margin: 10px 0;
+    border-radius: 14px;
+    font-size: 14.5px;
+    line-height: 1.45;
+    animation: slideUp 0.25s ease;
+    word-wrap: break-word;
+}
+
+.user {
+    align-self: flex-end;
+    background: linear-gradient(135deg, #2563eb, #1d4ed8);
+    color: #fff;
+    border-bottom-right-radius: 4px;
+}
+
+.bot {
+    align-self: flex-start;
+    background: #1e293b;
+    color: #e5e7eb;
+    border-bottom-left-radius: 4px;
+}
+
+.message img {
+    max-width: 100%;
+    border-radius: 12px;
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+    animation: fadeIn 0.4s ease;
+}
+
+.chat-input {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    gap: 8px;
+    background: linear-gradient(180deg, rgba(2, 6, 23, 0.8), #020617);
+    border-top: 1px solid #1e293b;
+}
+
+.chat-input input {
+    flex: 1;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: none;
+    outline: none;
+    background: #020617;
+    color: #f8fafc;
+    font-size: 14px;
+    box-shadow: inset 0 0 0 1px #1e293b;
+}
+
+.chat-input input::placeholder {
+    color: #64748b;
+}
+
+.chat-input button {
+    height: 42px;
+    padding: 0 16px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s ease;
+}
+
+.chat-input button:first-of-type {
+    background: linear-gradient(135deg, #38bdf8, #0ea5e9);
+    color: #020617;
+}
+
+.chat-input button:first-of-type:hover,
+.chat-input button:last-of-type:hover {
+    transform: translateY(-1px);
+}
+
+.chat-input button:first-of-type:hover {
+    box-shadow: 0 6px 16px rgba(56, 189, 248, 0.4);
+}
+
+.chat-input button:last-of-type {
+    background: linear-gradient(135deg, #22c55e, #16a34a);
+    color: #020617;
+}
+
+.chat-input button:last-of-type:hover {
+    box-shadow: 0 6px 16px rgba(34, 197, 94, 0.4);
+}
+
+.loader {
+    width: 26px;
+    height: 26px;
+    border: 3px solid #334155;
+    border-top: 3px solid #38bdf8;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+@keyframes slideUp {
+    from {
+        transform: translateY(6px);
+        opacity: 0;
+    }
+    to {
+        transform: translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (max-width: 480px) {
+    .chat-container {
+        width: 100%;
+        height: calc(100vh - 32px);
+        border-radius: 16px;
+    }
+}

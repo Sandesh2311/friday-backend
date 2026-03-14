@@ -1,71 +1,65 @@
 import os
-import webbrowser
+
 import requests
 import yt_dlp
+from dotenv import load_dotenv
+from indic_transliteration import sanscript
+from indic_transliteration.sanscript import transliterate
 from openai import OpenAI
+
 from project1_2.image_generator import generate_image
 from project1_2.musicLibrary import music
 
-from indic_transliteration.sanscript import transliterate
-from indic_transliteration import sanscript
-import os
-from dotenv import load_dotenv
 
 load_dotenv()
 
 
-import os
+def get_ai_client():
+    api_key = os.getenv("SAMBANOVA_API_KEY") or os.getenv("OPENAI_API_KEY")
+    if not api_key:
+        return None
 
-ai_client = OpenAI(
-    base_url="https://api.sambanova.ai/v1",
-    api_key=os.getenv("OPENAI_API_KEY")
-)
+    return OpenAI(
+        base_url="https://api.sambanova.ai/v1",
+        api_key=api_key,
+    )
 
 
 def hindi_to_english(text):
     try:
         return transliterate(text, sanscript.DEVANAGARI, sanscript.ITRANS)
-    except:
+    except Exception:
         return text
-
-
 
 
 def friday_engine(command: str):
     c = command.lower()
 
-    # 🖼 IMAGE GENERATION
     if "image" in c and any(k in c for k in ["generate", "create", "make", "draw", "bana"]):
         prompt = c
-        for w in ["generate", "create", "make", "draw", "image", "picture", "bana"]:
-            prompt = prompt.replace(w, "")
+        for word in ["generate", "create", "make", "draw", "image", "picture", "bana"]:
+            prompt = prompt.replace(word, "")
         prompt = prompt.strip()
 
         if not prompt:
             return {"type": "text", "data": "Please describe the image"}
 
-        image_path = generate_image(prompt)
-        image_name = os.path.basename(image_path)
-
         return {
             "type": "image",
-            "data": f"http://127.0.0.1:5000/images/{image_name}"
+            "data": generate_image(prompt),
         }
 
-# 🎵 MUSIC
     if c.startswith("play") or "gaana" in c:
         words = c.split()
 
-        # 1️⃣ Local library
-        for w in words:
-            w = hindi_to_english(w).lower()
-            if w in music:
+        for word in words:
+            key = hindi_to_english(word).lower()
+            if key in music:
                 return {
                     "type": "action",
-                    "data": music[w]
+                    "data": music[key],
                 }
 
-        # 2️⃣ YouTube FIRST VIDEO autoplay
         query = (
             c.replace("play", "")
             .replace("gaana", "")
@@ -78,7 +72,7 @@ def friday_engine(command: str):
                 "quiet": True,
                 "no_warnings": True,
                 "default_search": "ytsearch1",
-                "skip_download": True
+                "skip_download": True,
             }
 
             with yt_dlp.YoutubeDL(ydl_opts) as ydl:
@@ -87,17 +81,14 @@ def friday_engine(command: str):
 
             return {
                 "type": "action",
-                "data": video_url + "&autoplay=1"
+                "data": f"{video_url}&autoplay=1",
             }
-
-        except:
+        except Exception:
             return {
                 "type": "action",
-                "data": f"https://www.youtube.com/results?search_query={query}"
+                "data": f"https://www.youtube.com/results?search_query={query}",
             }
 
-
-    # 🌐 OPEN WEBSITES (STRICT MATCH)
     if "open google" in c or "google kholo" in c:
         return {"type": "action", "data": "https://google.com"}
 
@@ -110,50 +101,57 @@ def friday_engine(command: str):
     if "open linkedin" in c:
         return {"type": "action", "data": "https://linkedin.com"}
 
-    # 📰 NEWS
-    # 📰 NEWS
     if "news" in c or "khabar" in c:
+        news_api_key = os.getenv("NEWS_API_KEY")
+        if not news_api_key:
+            return {
+                "type": "text",
+                "data": "NEWS_API_KEY is not configured on the server.",
+            }
+
         try:
-            r = requests.get(
+            response = requests.get(
                 "https://newsapi.org/v2/everything",
                 params={
                     "q": "india",
                     "language": "en",
                     "sortBy": "publishedAt",
-                    "apiKey": os.getenv("NEWS_API_KEY")
+                    "apiKey": news_api_key,
                 },
-                timeout=10
+                timeout=10,
             )
-
-            data = r.json()
+            data = response.json()
 
             if data.get("articles"):
-                headlines = [a["title"] for a in data["articles"][:5]]
+                headlines = [article["title"] for article in data["articles"][:5]]
                 return {
                     "type": "text",
-                    "data": " | ".join(headlines)
-                }
-            else:
-                return {
-                    "type": "text",
-                    "data": "No news found at the moment"
+                    "data": " | ".join(headlines),
                 }
 
-        except Exception as e:
             return {
                 "type": "text",
-                "data": "News service unavailable"
+                "data": "No news found at the moment",
+            }
+        except Exception:
+            return {
+                "type": "text",
+                "data": "News service unavailable",
             }
 
+    ai_client = get_ai_client()
+    if ai_client is None:
+        return {
+            "type": "text",
+            "data": "OPENAI_API_KEY or SAMBANOVA_API_KEY is not configured on the server.",
+        }
 
-
-    # 🤖 AI CHAT (LAST FALLBACK)
     completion = ai_client.chat.completions.create(
         model="Meta-Llama-3.3-70B-Instruct",
         messages=[
             {"role": "system", "content": "You are Friday, an intelligent assistant."},
-            {"role": "user", "content": command}
-        ]
+            {"role": "user", "content": command},
+        ],
     )
 
     return {"type": "text", "data": completion.choices[0].message.content}
