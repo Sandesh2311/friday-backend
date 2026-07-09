@@ -2,6 +2,6 @@ Flask
 flask-cors
 requests
 python-dotenv
-openai
 yt-dlp
 indic-transliteration
+google-genai

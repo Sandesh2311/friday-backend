@@ -2,23 +2,203 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Friday AI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>F.R.I.D.A.Y AI Assistant</title>
+    <!-- Google Fonts for premium typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body class="dark-theme">
 
-<div class="chat-container">
-    <div class="chat-header">🤖 F.R.I.D.A.Y</div>
+<div class="app-container">
+    <!-- Header bar -->
+    <header class="app-header">
+        <div class="logo">
+            <span class="logo-icon">🤖</span>
+            <h1>F.R.I.D.A.Y</h1>
+        </div>
+        <div class="status-indicator">
+            <span class="pulse-dot idle" id="status-dot"></span>
+            <span class="status-text" id="status-text">System: Idle</span>
+        </div>
+    </header>
 
+    <!-- Main Content Panel (Grid layout) -->
+    <main class="app-body">
+        <!-- Main Chat Panel -->
+        <section class="chat-section">
+            <div class="chat-window" id="chat-box">
+                <!-- Welcome bubble -->
+                <div class="message bot">
+                    Hello! I am F.R.I.D.A.Y, your AI virtual assistant. How can I assist you today?
+                </div>
+            </div>
+            
+            <div class="chat-input-wrapper">
+                <input type="text" id="msg" placeholder="Type your command..." autocomplete="off" />
+                <button id="btn-send" onclick="sendMessage()" title="Send Command">Send</button>
+                <button id="btn-mic" onclick="toggleVoiceInput()" title="Voice Input">🎤</button>
+            </div>
+        </section>
 
-    <div id="chat-box"></div>
+        <!-- Sidebar Panel with widgets -->
+        <aside class="sidebar-section">
+            <!-- Weather Widget -->
+            <div class="widget weather-widget">
+                <h3>🌤️ Weather</h3>
+                <div class="widget-content">
+                    <p id="weather-info">Loading weather...</p>
+                    <div class="widget-controls">
+                        <input type="text" id="weather-city-input" placeholder="Enter city..." />
+                        <button onclick="updateWeatherCity()" class="small-btn">Update</button>
+                    </div>
+                </div>
+            </div>
 
-    <div class="chat-input">
-    <input id="msg" placeholder="Type your message..." />
-    <button onclick="sayHello()">Send</button>
-    <button onclick="startListening()">🎤</button>
+            <!-- News Widget -->
+            <div class="widget news-widget">
+                <h3>📰 Live News</h3>
+                <div class="widget-content">
+                    <div class="news-scroller" id="news-info">
+                        Loading news headlines...
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reminders Widget -->
+            <div class="widget reminders-widget">
+                <div class="reminder-panel-header">
+                    <div>
+                        <h3>⏰ Reminder Panel</h3>
+                        <p class="reminder-panel-subtitle">Stay on top of your day</p>
+                    </div>
+                    <span class="reminder-badge" id="reminder-count">0 pending</span>
+                </div>
+                <div class="widget-content reminder-panel-content">
+                    <div class="reminder-empty-state" id="reminder-empty-state">
+                        <div class="empty-illustration">🗓️</div>
+                        <p>No reminders yet</p>
+                        <span>Create a focused plan for today.</span>
+                    </div>
+                    <ul class="reminders-list" id="reminders-list"></ul>
+                </div>
+                <button class="floating-add-btn" onclick="openReminderModal()" title="Add Reminder">+</button>
+            </div>
+        </aside>
+    </main>
+
+    <!-- Footer Links -->
+    <footer class="app-footer">
+        <button onclick="openModal('settings-modal')" class="footer-link-btn">⚙️ Settings</button>
+        <button onclick="openModal('about-modal')" class="footer-link-btn">ℹ️ About FRIDAY</button>
+        <span class="footer-credits">FRIDAY AI &copy; 2026</span>
+    </footer>
 </div>
 
+<!-- Settings Modal -->
+<div id="settings-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>System Settings</h2>
+            <button class="close-btn" onclick="closeModal('settings-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="setting-group">
+                <label for="setting-theme">UI Theme:</label>
+                <select id="setting-theme" onchange="saveSettings()">
+                    <option value="dark">Dark Theme</option>
+                    <option value="light">Light Theme</option>
+                </select>
+            </div>
+            <div class="setting-group">
+                <label>Text to Speech:</label>
+                <div class="toggle-switch">
+                    <input type="checkbox" id="setting-voice" onchange="saveSettings()">
+                    <label for="setting-voice"></label>
+                </div>
+            </div>
+            <div class="setting-group">
+                <label for="setting-volume">Voice Volume:</label>
+                <input type="range" id="setting-volume" min="0" max="1" step="0.1" onchange="saveSettings()" />
+            </div>
+            <div class="setting-group">
+                <label for="setting-rate">Speech Speed (Rate):</label>
+                <input type="range" id="setting-rate" min="50" max="250" step="10" onchange="saveSettings()" />
+            </div>
+            <div class="setting-group">
+                <label for="setting-weather-city">Default Weather City:</label>
+                <input type="text" id="setting-weather-city" onchange="saveSettings()" placeholder="e.g. Mumbai" />
+            </div>
+            <div class="setting-group clear-actions">
+                <button onclick="clearChatHistory()" class="danger-btn">Clear Chat Logs</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reminder Modal -->
+<div id="reminder-modal" class="modal-overlay">
+    <div class="modal-content reminder-modal-content">
+        <div class="modal-header">
+            <h2>Create Reminder</h2>
+            <button class="close-btn" onclick="closeModal('reminder-modal')">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="reminder-form-grid">
+                <label for="reminder-text-input">Reminder</label>
+                <input type="text" id="reminder-text-input" placeholder="Buy groceries" />
+
+                <label for="reminder-date-input">Date</label>
+                <input type="date" id="reminder-date-input" />
+
+                <label for="reminder-time-input">Time</label>
+                <input type="time" id="reminder-time-input" />
+
+                <label for="reminder-priority-input">Priority</label>
+                <select id="reminder-priority-input">
+                    <option value="high">High</option>
+                    <option value="medium" selected>Medium</option>
+                    <option value="low">Low</option>
+                </select>
+            </div>
+            <div class="modal-actions">
+                <button class="secondary-btn" onclick="closeModal('reminder-modal')">Cancel</button>
+                <button class="primary-btn" onclick="submitReminderForm()">Save Reminder</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- About Modal -->
+<div id="about-modal" class="modal-overlay">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>About F.R.I.D.A.Y</h2>
+            <button class="close-btn" onclick="closeModal('about-modal')">&times;</button>
+        </div>
+        <div class="modal-body about-body">
+            <h3>F.R.I.D.A.Y AI Assistant</h3>
+            <p>Female Real-time Intelligent Decisive Assistant System.</p>
+            <hr>
+            <h4>Architecture (Internship Report):</h4>
+            <ul>
+                <li><strong>Client Layer:</strong> HTML5/CSS3/JavaScript web interface.</li>
+                <li><strong>Flask Application Layer:</strong> Python Flask microframework serving REST endpoints.</li>
+                <li><strong>External Services Layer:</strong> OpenWeatherMap API, NewsAPI, and SambaNova/OpenAI LLM services.</li>
+                <li><strong>SQLite Data Layer:</strong> Persistent SQLite relational tables (users, reminders, settings, interaction_log).</li>
+            </ul>
+            <hr>
+            <h4>Key Features Implemented:</h4>
+            <ul>
+                <li>Dual Input: Voice (Speech Recognition) and Text typing.</li>
+                <li>Automated rule matching & fallback AI completions.</li>
+                <li>Real-time weather, news feed, and schedule reminders.</li>
+                <li>Interaction history logging & dynamic client voice synthesis.</li>
+            </ul>
+        </div>
+    </div>
 </div>
 
 <script src="script.js"></script>
