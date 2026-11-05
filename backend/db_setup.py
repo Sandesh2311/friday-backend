@@ -1,10 +1,28 @@
 import os
 import sqlite3
+import shutil
+import tempfile
 from pathlib import Path
 
-# Database path in the root folder
+# Keep the checked-in/local database path for normal deployments. Vercel's
+# function bundle is read-only, so use its writable (but ephemeral) /tmp area.
 BASE_DIR = Path(__file__).resolve().parent.parent
-DB_PATH = BASE_DIR / "friday.db"
+_BUNDLED_DB_PATH = BASE_DIR / "friday.db"
+_CONFIGURED_DB_PATH = os.getenv("FRIDAY_DB_PATH")
+
+if _CONFIGURED_DB_PATH:
+    DB_PATH = Path(_CONFIGURED_DB_PATH).expanduser()
+elif os.getenv("VERCEL"):
+    DB_PATH = Path(tempfile.gettempdir()) / "friday.db"
+    # Seed a new function instance from the deployed database snapshot once.
+    # Never replace an existing writable copy, which may contain live changes.
+    if not DB_PATH.exists() and _BUNDLED_DB_PATH.is_file():
+        try:
+            shutil.copy2(_BUNDLED_DB_PATH, DB_PATH)
+        except FileExistsError:
+            pass
+else:
+    DB_PATH = _BUNDLED_DB_PATH
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)

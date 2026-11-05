@@ -78,3 +78,7 @@ Open a browser and navigate to:
 http://127.0.0.1:5000/
 ```
 The SQLite database `friday.db` will automatically initialize and seed default settings on the first startup.
+
+### Vercel SQLite behavior
+
+Vercel's function filesystem is read-only except for temporary storage. When `VERCEL` is set, the app copies the bundled `friday.db` to `/tmp/friday.db` on a new instance and writes there. This lets chat logging and reminders, history, and settings CRUD work in that instance, but `/tmp` is ephemeral: changes can disappear when Vercel replaces or restarts the instance and are not shared between instances. SQLite on Vercel therefore cannot provide durable persistence by itself. `FRIDAY_DB_PATH` can override the database location when deploying to an environment with a writable persistent disk; it is not a way to make Vercel `/tmp` persistent.
